@@ -5,19 +5,14 @@ class stock:
 
     def __init__(self, ticker: str):
         self.ticker = yfinance.Ticker(ticker)
-        self.__interval = "1mo"
-        self.__period = "10y"
         
-    def get_monthly_prices(self) -> pd.DataFrame:
-        history: pd.DataFrame = self.ticker.history(period=self.__period,interval=self.__interval)
+    def get_monthly_prices(self, period: str="10y", interval: str="1mo") -> pd.DataFrame:
+        history: pd.DataFrame = self.ticker.history(period=period,interval=interval)
         eom_prices: pd.DataFrame = history.resample('ME').last()
         eom_prices = eom_prices.drop(axis=1,columns=["Open","High","Low","Stock Splits", "Volume", "Dividends"]).dropna()
-        #eom_prices["Return"] = eom_prices["Close"].pct_change()
         return eom_prices
     
-    def get_monthly_returns(self) -> pd.Series:
-        t = self.get_monthly_prices().pct_change().iloc[:,0]
-        print(type(t))
-        print(self.get_monthly_prices().pct_change().iloc[:,0])
-        return self.get_monthly_prices().pct_change().iloc[:,0]
+    def get_monthly_returns(self, period: str="10y", interval: str="1mo") -> pd.Series:
+        t = self.get_monthly_prices(period=period,interval=interval).pct_change().iloc[:,0]
+        return t
         
