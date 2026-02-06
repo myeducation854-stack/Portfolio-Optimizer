@@ -1,5 +1,9 @@
-from src.stock import stock
-from src.stock_math_service import stock_math_service
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
+
+from stock import stock
+from stock_math_service import stock_math_service
 import yfinance
 import pandas as pd
 
@@ -10,6 +14,6 @@ if __name__ == "__main__":
     history = history.resample('ME').last()
 
     stockc = stock("AAPL")
-
+    
     test = stock_math_service.calculate_monthly_stock_beta(stockc)
     print(test)
