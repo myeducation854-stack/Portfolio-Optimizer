@@ -5,14 +5,14 @@ from src.stock import stock
 class stock_math_service:
 
     @staticmethod
-    def get_market_returns(interval: str="1mo", period: str="10y"):
+    def get_market_returns(interval: str="1mo", period: str="5y"):
         ticker = yfinance.Ticker("^GSPC")
         history: pd.DataFrame = ticker.history(period=period,interval=interval)
         history = history.resample('ME').last()
         return history["Close"].pct_change()
 
     @staticmethod
-    def calculate_monthly_stock_beta(stock: stock, interval: str="1mo", period: str="10y") -> float:
+    def calculate_monthly_stock_beta(stock: stock, interval: str="1mo", period: str="5y") -> float:
         monthly_stock_returns: pd.Series = stock.get_monthly_returns(period=period,interval=interval)
         monthly_market_returns: pd.Series = stock_math_service.get_market_returns(period=period,interval=interval)
         returns = pd.concat([monthly_stock_returns, monthly_market_returns], axis=1).dropna()
@@ -21,14 +21,20 @@ class stock_math_service:
         return beta
     
     @staticmethod
-    def get_annual_risk_free_rate(period: str="10y") -> float:
+    def get_annual_risk_free_rate(period: str="5y") -> float:
         tnx = yfinance.Ticker("^TNX")
         data = tnx.history(period=period)
         latest_yield: float = data["Close"].iloc[-1] / 100
         return latest_yield
+    
+    @staticmethod
+    def get_monthly_risk_free_rate(period: str="5y", interval: int=1) -> float:
+        rfa = stock_math_service.get_annual_risk_free_rate(period=period) 
+        rf_monthly = (1 + rfa) ** (interval/12) - 1
+        return rf_monthly
 
     @staticmethod
-    def get_monthly_expected_market_return(interval: str="1mo", period: str="10y") -> float:
+    def get_monthly_expected_market_return(interval: str="1mo", period: str="5y") -> float:
         return stock_math_service.get_market_returns(interval=interval,period=period).mean()
     
     @staticmethod
